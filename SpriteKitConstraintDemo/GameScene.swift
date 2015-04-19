@@ -9,14 +9,40 @@
 import SpriteKit
 
 class GameScene: SKScene {
+
+    var sprite = SKSpriteNode()
+    
     override func didMoveToView(view: SKView) {
         /* Setup your scene here */
-        let myLabel = SKLabelNode(fontNamed:"Chalkduster")
-        myLabel.text = "Hello, World!";
-        myLabel.fontSize = 65;
-        myLabel.position = CGPoint(x:CGRectGetMidX(self.frame), y:CGRectGetMidY(self.frame));
+        self.backgroundColor = UIColor.blackColor()
         
-        self.addChild(myLabel)
+        // Create the followed sprite
+        sprite = SKSpriteNode(imageNamed:"Spaceship")
+        sprite.xScale = 0.15
+        sprite.yScale = 0.15
+        sprite.position = CGPointMake(100, 100)
+        self.addChild(sprite)
+        
+        // Create the follower sprite
+        let followerSprite = SKSpriteNode(imageNamed:"Spaceship")
+        followerSprite.xScale = 0.15
+        followerSprite.yScale = 0.15
+        followerSprite.position = CGPointMake(150, 150)
+        followerSprite.color = UIColor.redColor()
+        followerSprite.colorBlendFactor=0.8
+        self.addChild(followerSprite)
+        
+        // Define Constraints for following behavior
+        let rangeToSprite = SKRange(lowerLimit: 100.0, upperLimit: 150.0)
+        let distanceConstraint = SKConstraint.distance(rangeToSprite, toNode: sprite)
+        
+        // Define Constraints for orientation/targeting behavior
+        let rangeForOrientation = SKRange(lowerLimit: CGFloat(M_2_PI*7), upperLimit: CGFloat(M_2_PI*7))
+        let orientConstraint = SKConstraint.orientToNode(sprite, offset: rangeForOrientation)
+        
+        // Add constraints
+        followerSprite.constraints = [orientConstraint, distanceConstraint]
+        
     }
     
     override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
@@ -24,20 +50,13 @@ class GameScene: SKScene {
         
         for touch in (touches as! Set<UITouch>) {
             let location = touch.locationInNode(self)
-            
-            let sprite = SKSpriteNode(imageNamed:"Spaceship")
-            
-            sprite.xScale = 0.5
-            sprite.yScale = 0.5
-            sprite.position = location
-            
-            let action = SKAction.rotateByAngle(CGFloat(M_PI), duration:1)
-            
-            sprite.runAction(SKAction.repeatActionForever(action))
-            
-            self.addChild(sprite)
+            let action = SKAction.moveTo(location, duration: 1)
+            sprite.runAction(action)
         }
+ 
     }
+    
+ 
    
     override func update(currentTime: CFTimeInterval) {
         /* Called before each frame is rendered */
